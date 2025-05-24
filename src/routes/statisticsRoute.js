@@ -1,5 +1,5 @@
 import express from 'express';
-import { getCompletionRates, getPieChartStats } from '../controller/statisticsController';
+import { getCompletionRates, getPieChartStats } from '../controller/statisticsController.js';
 import verifyToken from '../middlewares/authMiddlewares.js';
 
 const router = express.Router();
