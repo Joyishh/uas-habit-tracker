@@ -57,6 +57,7 @@ class StatsScreen extends StatelessWidget {
         title: const Text('Statistics'),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
