@@ -66,11 +66,28 @@ export const updateHabit = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
     const { name, description, color_hex, frequency_type, days_of_week } = req.body;
-    if (!name || !description || !color_hex || !frequency_type || !days_of_week) return res.status(400).json({ error: "All fields required" });
+
+    if (!name || !description || !color_hex || !frequency_type) {
+        return res.status(400).json({ error: "All fields required" });
+    }
+
+    if (frequency_type === 'specific_days_of_week') {
+        if (!Array.isArray(days_of_week) || days_of_week.length === 0) {
+            return res.status(400).json({ error: "days_of_week is required for specific_days_of_week" });
+        }
+    }
+
+    const updateData = {
+        name,
+        description,
+        color_hex,
+        frequency_type,
+        days_of_week: frequency_type === 'specific_days_of_week' ? days_of_week : null
+    };
 
     const { data, error } = await supabase
         .from("habits")
-        .update({ name, description, color_hex, frequency_type, days_of_week })
+        .update(updateData)
         .eq("id", id)
         .eq("user_id", userId)
         .select("id, name, description, frequency_type, days_of_week, color_hex, created_at")
