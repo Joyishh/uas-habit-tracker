@@ -18,14 +18,15 @@ class HabitEntries {
   });
 
   factory HabitEntries.fromJson(Map<String, dynamic> json) {
+    print('[DEBUG][HabitEntries.fromJson] raw json: $json');
     return HabitEntries(
-      id: json['id'] as String,
-      habitId: json['habit_id'] as String,
-      userId: json['user_id'] as String,
-      entryDate: DateTime.parse(json['entry_date'] as String),
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      id: json['id']?.toString() ?? '',
+      habitId: json['habit_id']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      entryDate: json['entry_date'] != null ? DateTime.parse(json['entry_date'].toString()) : DateTime.now(),
+      status: json['status']?.toString() ?? '',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'].toString()) : DateTime.now(),
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'].toString()) : DateTime.now(),
     );
   }
 
