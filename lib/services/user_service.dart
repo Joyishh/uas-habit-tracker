@@ -38,6 +38,22 @@ class UserService {
     }
   }
 
+  Future<String> loginAndGetToken(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final token = data['token'] as String?;
+      if (token == null) throw Exception('No token in response');
+      return token;
+    } else {
+      throw Exception('Email or password is incorrect');
+    }
+  }
+
   Future<User?> fetchUserById(String userId) async {
     final response = await http.get(Uri.parse('$baseUrl/users/$userId'));
     if (response.statusCode == 200) {

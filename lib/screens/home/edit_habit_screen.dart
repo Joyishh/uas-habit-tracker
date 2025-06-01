@@ -2,26 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:ui_habit_tracker/widgets/frequency_selector.dart';
 import 'package:ui_habit_tracker/widgets/day_selector.dart';
 import 'package:ui_habit_tracker/widgets/color_picker.dart';
+import 'package:ui_habit_tracker/models/habits.dart';
+import 'package:ui_habit_tracker/services/habit_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditHabitScreen extends StatefulWidget {
-  const EditHabitScreen({Key? key}) : super(key: key);
+  final Habits habit;
+  const EditHabitScreen({Key? key, required this.habit}) : super(key: key);
 
   @override
   State<EditHabitScreen> createState() => _EditHabitScreenState();
 }
 
 class _EditHabitScreenState extends State<EditHabitScreen> {
-  final TextEditingController _titleController = TextEditingController(text: 'Lari Mingguan');
-  final TextEditingController _descController = TextEditingController(text: 'Lari tiap hari minggu pagi');
-  String _frequency = 'Weekly';
+    late TextEditingController _titleController;
+  late TextEditingController _descController;
+  late String _frequency;
+  late Set<String> _selectedDays;
+  late int _selectedColor;
+
   final List<String> _days = [
     'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
   ];
-  final Set<String> _selectedDays = {'Sunday'};
   final List<Color> _colors = [
     Colors.green, Colors.yellow, Colors.red, Colors.orange, Colors.cyan, Colors.blue, Colors.pink
   ];
-  int _selectedColor = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.habit.name);
+    _descController = TextEditingController(text: widget.habit.description);
+    _frequency = widget.habit.frequencyType.toLowerCase() == 'specific_days_of_week' ? 'Weekly' : widget.habit.frequencyType[0].toUpperCase() + widget.habit.frequencyType.substring(1).toLowerCase();
+    _selectedDays = (widget.habit.daysOfWeek is List && widget.habit.daysOfWeek != null)
+        ? (widget.habit.daysOfWeek as List).map((e) => _days[e as int]).toSet()
+        : <String>{};
+    _selectedColor = _colorIndexFromHex(widget.habit.colorHex);
+  }
+
+  static int _colorIndexFromHex(String hex) {
+    const colorHexes = ['#4CAF50', '#FFEB3B', '#F44336', '#FF9800', '#00BCD4', '#2196F3', '#E91E63'];
+    final idx = colorHexes.indexWhere((h) => h.toLowerCase() == hex.toLowerCase());
+    return idx >= 0 ? idx : 0;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +134,45 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
             const SizedBox(height: 40),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Simpan perubahan
+                onPressed: () async {
+                  // Validasi
+                  if (_titleController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Title cannot be empty')),
+                    );
+                    return;
+                  }
+                  if (_frequency == 'Weekly' && _selectedDays.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please select at least one day for weekly habit')),
+                    );
+                    return;
+                  }
+                  // Ambil token
+                  final prefs = await SharedPreferences.getInstance();
+                  final token = prefs.getString('token');
+                  if (token == null) return;
+                  // Siapkan data habit baru
+                  final updatedHabit = Habits(
+                    id: widget.habit.id,
+                    userId: widget.habit.userId,
+                    name: _titleController.text.trim(),
+                    description: _descController.text.trim(),
+                    colorHex: '#${_colors[_selectedColor].value.toRadixString(16).substring(2)}',
+                    frequencyType: _frequency == 'Weekly' ? 'specific_days_of_week' : _frequency.toLowerCase(),
+                    daysOfWeek: _frequency == 'Weekly' ? _selectedDays.map((d) => _days.indexOf(d)).toList() : null,
+                    createdAt: widget.habit.createdAt,
+                    updatedAt: DateTime.now(),
+                  );
+                  try {
+                    await HabitService().updateHabit(updatedHabit, token);
+                    if (!mounted) return;
+                    Navigator.pop(context, true);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to update habit: $e')),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF183B4E),

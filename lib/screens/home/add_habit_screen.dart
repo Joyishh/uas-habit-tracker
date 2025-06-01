@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ui_habit_tracker/services/habit_service.dart';
+import 'package:ui_habit_tracker/models/habits.dart';
 import 'package:ui_habit_tracker/widgets/frequency_selector.dart';
 import 'package:ui_habit_tracker/widgets/day_selector.dart';
 import 'package:ui_habit_tracker/widgets/color_picker.dart';
@@ -19,10 +22,45 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   ];
   final Set<String> _selectedDays = {};
   final List<Color> _colors = [
-    Color(0xFFBFFF5B), Color(0xFFFFFF5B), Color(0xFFFF5B5B), Color(0xFFFFC85B),
-    Color(0xFF5BFFD7), Color(0xFF5B8BFF), Color(0xFFFF5BFF)
+    Colors.green, Colors.yellow, Colors.red, Colors.orange, Colors.cyan, Colors.blue, Colors.pink
   ];
   int _selectedColor = 0;
+  bool _isLoading = false;
+  String? _error;
+
+  Future<void> _createHabit() async {
+    setState(() { _isLoading = true; _error = null; });
+    try {
+      if (_frequency == 'Weekly' && _selectedDays.isEmpty) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Please select at least one day for Weekly habit.';
+        });
+        return;
+      }
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null) throw Exception('No token found');
+      final habit = Habits(
+        id: '',
+        userId: '',
+        name: _nameController.text.trim(),
+        description: _descController.text.trim(),
+        colorHex: '#${_colors[_selectedColor].value.toRadixString(16).substring(2)}',
+        frequencyType: _frequency,
+        daysOfWeek: _frequency == 'Weekly' ? _selectedDays.map((d) => _days.indexOf(d)).toList() : [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await HabitService().createHabit(habit, token);
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      setState(() { _error = e.toString(); });
+    } finally {
+      setState(() { _isLoading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +140,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _isLoading ? null : _createHabit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF163B4D),
                   shape: RoundedRectangleBorder(
@@ -110,12 +148,18 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text(
-                  'Add Habit',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-                ),
+                child: _isLoading
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text(
+                        'Add Habit',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
+                      ),
               ),
             ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: TextStyle(color: Colors.red)),
+            ],
             const SizedBox(height: 24),
           ],
         ),

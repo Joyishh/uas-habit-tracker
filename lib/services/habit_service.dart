@@ -31,26 +31,29 @@ class HabitService {
       },
       body: jsonEncode(habit.toJson()),
     );
+    print('Create habit response: status \\${response.statusCode}, body: \\${response.body}'); // Debug print
     if (response.statusCode == 201 || response.statusCode == 200) {
       return Habits.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to create habit');
+      throw Exception('Failed to create habit: \\${response.body}');
     }
   }
 
   Future<Habits> updateHabit(Habits habit, String token) async {
+    print('DEBUG updateHabit: id=${habit.id}, name=${habit.name}');
     final response = await http.put(
       Uri.parse('$baseUrl/habit/${habit.id}'),
       headers: {
         'Authorization' : 'Bearer $token',
         'Content-Type': 'application/json'
-        },
-      body: jsonEncode(habit.toJson()),
+      },
+      body: jsonEncode(habit.toJson()), // Gunakan toJson agar mapping konsisten
     );
+    print('DEBUG updateHabit response: status=${response.statusCode}, body=${response.body}');
     if (response.statusCode == 200) {
       return Habits.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to update habit');
+      throw Exception('Failed to update habit: ${response.body}');
     }
   }
 

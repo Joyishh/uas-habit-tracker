@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ui_habit_tracker/screens/main_screen.dart';
 import 'package:ui_habit_tracker/services/user_service.dart';
 
@@ -7,9 +8,9 @@ class LoginScreen extends StatefulWidget {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
-  }
+}
 
-  class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final UserService _userService = UserService();
@@ -29,10 +30,13 @@ class LoginScreen extends StatefulWidget {
       return;
     }
     try {
-      await _userService.loginUser(
+      final token = await _userService.loginAndGetToken(
         _emailController.text.trim(),
         _passwordController.text,
       );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      print('JWT Token: $token');
       if (!mounted) return;
       showDialog(
         context: context,
