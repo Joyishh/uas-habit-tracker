@@ -129,3 +129,38 @@ export const habitCheckIn = async (req, res) => {
     res.status(201).json({ message: "Check-in successful", entry: data });
 };
 
+export const getHabitEntries = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { data, error } = await supabase
+        .from("habit_entries")
+        .select("id, habit_id, user_id, entry_date, status")
+        .eq("habit_id", id)
+        .eq("user_id", userId)
+        .order("entry_date", { ascending: false });
+    if (error) return res.status(404).json({ error: "Habit entries not found" });
+    res.json(data);
+}
+
+export const getMontlyHabitEntries = async (req, res) => {
+    const userId = req.user.id;
+    const { month, year } = req.query;
+
+    if (!month || !year) {
+        return res.status(400).json({ error: "Month and year are required" });
+    }
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const { data, error } = await supabase
+        .from("habit_entries")
+        .select("id, habit_id, user_id, entry_date, status")
+        .eq("user_id", userId)
+        .gte("entry_date", startDate.toISOString().slice(0, 10))
+        .lte("entry_date", endDate.toISOString().slice(0, 10))
+        .order("entry_date", { ascending: false });
+
+    if (error) return res.status(404).json({ error: "Habit entries not found" });
+    res.json(data);
+};
