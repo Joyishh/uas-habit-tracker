@@ -44,4 +44,26 @@ class HabitEntriesService {
       throw Exception('Failed to fetch habit entries');
     }
   }
+
+  Future<List<HabitEntries>> getEntriesByMonthYear({
+    required int month,
+    required int year,
+    required String token,
+  }) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/habit/entries?month=$month&year=$year'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    print('[DEBUG][ENTRIES_SERVICE] statusCode: ${response.statusCode}');
+    print('[DEBUG][ENTRIES_SERVICE] response.body: ${response.body}');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((e) => HabitEntries.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to fetch habit entries by month/year');
+    }
+  }
 }
