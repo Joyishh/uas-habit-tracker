@@ -27,7 +27,13 @@ class FrequencySelector extends StatelessWidget {
             },
             activeColor: const Color(0xFF163B4D),
           ),
-          Text(option),
+          Text(
+            option,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
           const SizedBox(width: 16),
         ],
       )).toList(),

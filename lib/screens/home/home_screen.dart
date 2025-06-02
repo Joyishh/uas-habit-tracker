@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: _selectionMode
             ? Text('${_selectedHabitIds.length} selected')
-            : const Text('My Habit'),
+            : const Text('My Habit', style: TextStyle(fontWeight: FontWeight.w600),),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black,
@@ -120,7 +120,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: _exitSelectionMode,
                 ),
               ]
-            : null,
+            : [
+                IconButton(
+                  icon: const Icon(Icons.logout, color: const Color(0xff27548A)),
+                  tooltip: 'Logout',
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('token');
+                    if (!mounted) return;
+                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                  },
+                ),
+              ],
       ),
       body: FutureBuilder<List<Habits>>(
         future: _habitsFuture,

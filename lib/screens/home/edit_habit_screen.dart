@@ -58,7 +58,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE6FFF7),
       appBar: AppBar(
-        title: const Text('Edit Habit'),
+        title: const Text('Edit Habit', style: TextStyle(fontWeight: FontWeight.w600),),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
       ),
@@ -98,7 +98,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
             ),
             const SizedBox(height: 24),
-            const Text('Frequency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
             const SizedBox(height: 8),
             FrequencySelector(
               selected: _frequency,
@@ -107,7 +107,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
             ),
             const SizedBox(height: 8),
             if (_frequency == 'Weekly') ...[
-              const Text('Target Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const Text('Target Day', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
               const SizedBox(height: 8),
               DaySelector(
                 days: _days,
@@ -124,7 +124,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
               ),
               const SizedBox(height: 24),
             ],
-            const Text('Color', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const Text('Color', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
             const SizedBox(height: 8),
             ColorPicker(
               colors: _colors,

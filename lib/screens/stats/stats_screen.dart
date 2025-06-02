@@ -37,7 +37,7 @@ class _StatsScreenState extends State<StatsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE6FFF7),
       appBar: AppBar(
-        title: const Text('Statistics'),
+        title: const Text('Statistics', style: TextStyle(fontWeight: FontWeight.w600),),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
         automaticallyImplyLeading: false,

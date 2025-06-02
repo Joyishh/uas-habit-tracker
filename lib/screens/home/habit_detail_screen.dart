@@ -136,7 +136,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE6FFF7),
       appBar: AppBar(
-        title: const Text('Details My Habit'),
+        title: const Text('Details My Habit', style: TextStyle(fontWeight: FontWeight.w600),),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
         actions: [
@@ -221,17 +221,17 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                   ),
                   const SizedBox(height: 24),
                   // Frequency
-                  const Text('Frequency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
                   const SizedBox(height: 8),
                   FrequencySelector(
                     selected: _habit.frequencyType.toLowerCase() == 'specific_days_of_week' ? 'weekly' : _habit.frequencyType.toLowerCase(),
                     options: const ['daily', 'weekly'],
-                    onChanged: (_) {}, // dummy, tidak interaktif
+                    onChanged: (_) {},
                   ),
                   const SizedBox(height: 8),
                   // Target Day hanya tampil jika weekly
                   if (_habit.frequencyType.toLowerCase() == 'weekly' || _habit.frequencyType.toLowerCase() == 'specific_days_of_week') ...[
-                    const Text('Target Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    const Text('Target Day', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
                     SizedBox(height: 8),
                     DaySelector(
                       days: const ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -243,7 +243,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                     const SizedBox(height: 24),
                   ],
                   // Color
-                  const Text('Color', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const Text('Color', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
                   const SizedBox(height: 8),
                   ColorPicker(
                     colors: const [

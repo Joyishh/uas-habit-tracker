@@ -70,7 +70,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: const Color(0xFF163B4D),
-        title: const Text('Add Habit', style: TextStyle(fontWeight: FontWeight.w500)),
+        title: const Text('Add Habit', style: TextStyle(fontWeight: FontWeight.w600)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -106,7 +106,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
             FrequencySelector(
               selected: _frequency,
               options: const ['Daily', 'Weekly'],
@@ -114,7 +114,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             ),
             if (_frequency == 'Weekly') ...[
               const SizedBox(height: 8),
-              const Text('Target Day', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+              const Text('Target Day', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
               DaySelector(
                 days: _days,
                 selectedDays: _selectedDays,
@@ -130,7 +130,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               ),
             ],
             const SizedBox(height: 18),
-            const Text('Color', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const Text('Color', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18)),
             ColorPicker(
               colors: _colors,
               selectedIndex: _selectedColor,
