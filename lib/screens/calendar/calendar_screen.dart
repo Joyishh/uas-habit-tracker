@@ -41,35 +41,53 @@ class _CalendarScreenState extends State<CalendarScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      if (token == null) throw Exception('No token found');
-      final habits = await HabitService().getAllHabits(token);
-      final now = _focusedDay;
-      final entries = await HabitEntriesService().getEntriesByMonthYear(
-        month: now.month,
-        year: now.year,
-        token: token,
-      );
-      // Mapping habits ke tanggal sesuai algoritma
-      final Map<DateTime, List<Habits>> habitsPerDay = {};
-      for (final habit in habits) {
-        for (int i = 1; i <= DateUtils.getDaysInMonth(now.year, now.month); i++) {
-          final date = dateOnly(DateTime(now.year, now.month, i));
-          if (_isHabitScheduledOn(habit, date)) {
-            habitsPerDay.putIfAbsent(date, () => []).add(habit);
+      if (token == null) {
+        // Jika token null, redirect ke login
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
+      }
+      try {
+        final habits = await HabitService().getAllHabits(token);
+        final now = _focusedDay;
+        final entries = await HabitEntriesService().getEntriesByMonthYear(
+          month: now.month,
+          year: now.year,
+          token: token,
+        );
+        // Mapping habits ke tanggal sesuai algoritma
+        final Map<DateTime, List<Habits>> habitsPerDay = {};
+        for (final habit in habits) {
+          for (int i = 1; i <= DateUtils.getDaysInMonth(now.year, now.month); i++) {
+            final date = dateOnly(DateTime(now.year, now.month, i));
+            if (_isHabitScheduledOn(habit, date)) {
+              habitsPerDay.putIfAbsent(date, () => []).add(habit);
+            }
           }
         }
+        // Mapping entries ke tanggal
+        final Map<DateTime, List<HabitEntries>> entriesPerDay = {};
+        for (final entry in entries) {
+          final date = dateOnly(entry.entryDate);
+          entriesPerDay.putIfAbsent(date, () => []).add(entry);
+        }
+        setState(() {
+          _habitsPerDay = habitsPerDay;
+          _entriesPerDay = entriesPerDay;
+          _isLoading = false;
+        });
+      } catch (e) {
+        // Jika error 401 atau Invalid token, hapus token dan redirect ke login
+        if (e.toString().contains('401') || e.toString().toLowerCase().contains('invalid token')) {
+          await prefs.remove('token');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+          return;
+        }
+        setState(() { _error = e.toString(); _isLoading = false; });
       }
-      // Mapping entries ke tanggal
-      final Map<DateTime, List<HabitEntries>> entriesPerDay = {};
-      for (final entry in entries) {
-        final date = dateOnly(entry.entryDate);
-        entriesPerDay.putIfAbsent(date, () => []).add(entry);
-      }
-      setState(() {
-        _habitsPerDay = habitsPerDay;
-        _entriesPerDay = entriesPerDay;
-        _isLoading = false;
-      });
     } catch (e) {
       setState(() { _error = e.toString(); _isLoading = false; });
     }
@@ -191,6 +209,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             }).toList(),
                             if ((_habitsPerDay[dateOnly(_selectedDay ?? DateTime.now())] ?? []).isEmpty)
                               const Center(child: Text('No habit for this day')),
+                            const SizedBox(height: 24),
                           ],
                         ),
                       ),

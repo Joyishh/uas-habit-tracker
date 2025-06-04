@@ -7,7 +7,7 @@ import '../../models/habits.dart';
 import '../../models/habit_entries.dart';
 import '../../widgets/pie_chart_stats.dart';
 import '../../widgets/progres_bar_stats.dart';
-
+// ignore_for_file: unnecessary_cast
 class StatsScreen extends StatefulWidget {
   const StatsScreen({Key? key}) : super(key: key);
 
@@ -122,7 +122,7 @@ class _StatsScreenState extends State<StatsScreen> {
           final pieSections = statHabits.map((h) => PieChartSectionData(
             color: h['color'],
             value: h['value'],
-            title: '${h['title']}\n${h['value']}',
+            title: '${h['title']}\n${h['value'] is double ? (h['value'] as double).toStringAsFixed(0) : h['value']}',
             titleStyle: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,

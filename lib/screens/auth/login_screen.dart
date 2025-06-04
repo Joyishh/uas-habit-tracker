@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ui_habit_tracker/screens/main_screen.dart';
@@ -16,6 +19,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final UserService _userService = UserService();
   bool _isLoading = false;
   String? _error;
+
+  Future<void> registerFcmToken(String token, String fcmToken) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:5000/notification/register-fcm-token'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'fcm_token': fcmToken}), // gunakan snake_case sesuai backend
+    );
+    print('Register FCM token response: \\${response.statusCode} \\${response.body}');
+  }
 
   void _login() async {
     setState(() {
@@ -37,6 +52,13 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
       print('JWT Token: $token');
+      // Kirim FCM token ke backend
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await registerFcmToken(token, fcmToken);
+      }
+      // Setelah login, cek dan jadwalkan notifikasi jika ada habit yang belum selesai
+      // await NotificationService.checkAndScheduleGlobalReminders(); // DIHAPUS karena notifikasi lokal sudah tidak dipakai
       if (!mounted) return;
       showDialog(
         context: context,
@@ -73,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
