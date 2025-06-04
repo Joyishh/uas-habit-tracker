@@ -2,12 +2,14 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import supabase from './src/config/supabase.js';
+import "./src/utils/habitReminderCron.js";
 
 import userRoute from './src/routes/userRoute.js';
 import authRoute from './src/routes/authRoute.js';
 import habitRoute from './src/routes/habitRoute.js';
 import statisticsRoute from './src/routes/statisticsRoute.js';
 import calendarRoute from './src/routes/calendarRoute.js';
+import notificationRoute from './src/routes/notificationRoute.js';
 
 dotenv.config();
 const app = express();
@@ -26,6 +28,7 @@ app.use('/auth', authRoute);
 app.use('/habit', habitRoute);
 app.use('/statistics', statisticsRoute);
 app.use('/calendar', calendarRoute);
+app.use('/notification', notificationRoute);
 
 (async () => {
   try {
